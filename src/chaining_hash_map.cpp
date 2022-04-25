@@ -43,22 +43,23 @@ namespace assignment {
 
     // вычисление индекса ячейки словаря по ключу
     const int index = hash(key, buckets_.size());
-
+    if (Contains(key)){
+      return false;
+    }
     // добавление пары "ключ-значение" в ячейку словаря (в конец связного списка)
     buckets_[index].push_back(Node(key, value));
-
+    num_keys_ += 1;
     // расширение словаря до новой емкости в случае превышения коэффициента заполнения
     if (num_keys_ / static_cast<double>(buckets_.size()) > load_factor_) {
-      const int new_capacity = 0 /* здесь должна быть ваше выражение */;
+      const int new_capacity = capacity() * kGrowthCoefficient /* здесь должна быть ваше выражение */;
       resize(new_capacity);
     }
-
     return true;
   }
 
   std::optional<int> ChainingHashMap::Remove(int key) {
 
-    const int index = 0 /* напишите здесь свой код */;
+    const int index = hash(key, capacity());
 
     // здесь используется итератор (по сути указатель на узел списка)
     for (auto it = buckets_[index].begin(); it != buckets_[index].end(); ++it) {
@@ -69,7 +70,7 @@ namespace assignment {
 
         // удаляем элемент из списка по итератору (указателю)
         buckets_[index].erase(it);
-
+        num_keys_ -= 1;
         // возвращаем значение удаленного элемента
         return removed;
       }
@@ -81,14 +82,15 @@ namespace assignment {
   std::optional<int> ChainingHashMap::Search(int key) const {
 
     // вычисление индекса ячейки для указанного ключа
-    const int index = 0 /* напишите здесь свой код */;
+    const int index = hash(key, capacity());
 
     // Проходимся по всем элемента в ячейке словаря.
     // В худшем случае все элементы попали в одну ячейку словаря и сложность поиска ~ O(N).
     for (const Node& node : buckets_[index]) {
-      // напишите здесь свой код ...
+      if(node.key == key){
+        return node.value;
+      }
     }
-
     return std::nullopt;
   }
 
@@ -104,7 +106,12 @@ namespace assignment {
   }
 
   bool ChainingHashMap::Contains(int key) const {
-    // Напишите здесь свой код ...
+    const int index = hash(key, capacity());
+    for (const Node& node: buckets_[index]){
+      if(node.key == key){
+        return true;
+      }
+    }
     return false;
   }
 
@@ -133,7 +140,7 @@ namespace assignment {
     // пересчитываем индексы элементов словаря, учитывая новую емкость
     for (const Bucket& bucket : buckets_) {
       for (const Node& node : bucket) {
-        const int new_index = 0 /* напишите здесь свой код */;
+        const int new_index = hash(node.key, new_capacity);
         new_buckets[new_index].push_back(node);
       }
     }
